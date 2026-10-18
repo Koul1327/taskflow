@@ -1,36 +1,35 @@
 name: CI
 
 on:
-    push:
-        branches: [feat/dockerfile]
-    pull_request:
-        branches: [main]
+  push:
+    branches: [feat/dockerfile]
+  pull_request:
+    branches: [main]
 
 permissions:
-    contents: read
+  contents: read
 
 jobs:
-    check:
-        runs-on: ubuntu-latest
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Получить код из репозитория
+        uses: actions/checkout@v6
 
-        steps:
-            - name: Получить код из репозитория
-            uses: actions/checkout@v6
+      - name: Установить Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: "22"
+          cache: npm
 
-            - name: Установить Node.js
-            uses: actions/setup-node@v7
-            with:
-                node-version: "22"
-                cache: npm
+      - name: Установить зависимости
+        run: npm ci
 
-            - name: Установить зависимости
-            run: npm ci
+      - name: Проверить синтаксис JavaScript
+        run: |
+          node --check app.js
+          node --check server.js
+          node --check db.js
 
-            - name: Проверить синтаксис JavaScript
-            run: |
-                node --check app.js
-                node --check server.js
-                node --check db.js
-
-            - name: Собрать Docker-образ
-            run: docker build -t taskflow:ci
+      - name: Собрать Docker-образ
+        run: docker build -t taskflow:ci .
