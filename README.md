@@ -1,2 +1,11 @@
 # taskflow
-devopsPractise
+
+DevOpsPractice
+
+## Как запускать приложение
+
+1. Перейти в папку проекта: `cd ~/taskflow`
+2. Установить зависимости: `npm ci`
+3. Создать файл `.env` по образцу `.env.example` и заполнить его.
+4. Подготовить базу: `npm run db:init`
+5. Запустить приложение: `npm start`
