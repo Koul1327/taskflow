@@ -1,8 +1,8 @@
-name: CI
+name: CI/CD
 
 on:
   push:
-    branches: [feat/dockerfile]
+    branches: [feat/publish-ghcr, main]
   pull_request:
     branches: [main]
 
@@ -10,7 +10,7 @@ permissions:
   contents: read
 
 jobs:
-  check:
+  test:
     runs-on: ubuntu-latest
     steps:
       - name: Получить код из репозитория
@@ -33,3 +33,30 @@ jobs:
 
       - name: Собрать Docker-образ
         run: docker build -t taskflow:ci .
+
+  publish:
+    needs: test
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Получить код из репозитория
+        uses: actions/checkout@v6
+
+      - name: Войти в GHCR
+        uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Собрать и опубликовать образ
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          push: true
+          tags: |
+            ghcr.io/koul1327/taskflow:latest
+            ghcr.io/koul1327/taskflow:${{ github.sha }}
